@@ -44,3 +44,6 @@ ignore = [
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
+
+[tool.mypy]
+explicit_package_bases = true
