@@ -26,3 +26,21 @@ dev = [
     "pytest>=8.4.2",
     "ruff>=0.14.1",
 ]
+
+[tool.ruff]
+target-version = "py314"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "ALL",
+]
+ignore = [
+    "COM812",  # redundant with formatter & not recommended
+    "D",       # not a big docstring guy
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
