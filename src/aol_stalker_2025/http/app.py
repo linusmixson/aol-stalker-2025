@@ -1,13 +1,11 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
+from sqlmodel import func, select
 
-from aol_stalker_2025.http.models import RootResponse, SearchResponse
 from aol_stalker_2025.db.engine import (
-    AsyncSessionDependency,
     SessionDependency,
-    get_session,
 )
 from aol_stalker_2025.db.models.queries import Query
-from sqlmodel import select, func
+from aol_stalker_2025.http.models import RootResponse, SearchResponse
 
 app = FastAPI()
 
@@ -18,7 +16,7 @@ def read_root() -> RootResponse:
 
 
 @app.get("/search")
-def search(
+def search(  # noqa: PLR0913
     session: SessionDependency,
     literal: str | None = None,
     anon_id: int | None = None,

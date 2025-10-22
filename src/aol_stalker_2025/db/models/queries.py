@@ -1,8 +1,6 @@
 from datetime import datetime
 
 from sqlmodel import Field, SQLModel
-from pgvector.sqlalchemy import Vector
-from pydantic import ConfigDict
 
 
 class Query(SQLModel, table=True):

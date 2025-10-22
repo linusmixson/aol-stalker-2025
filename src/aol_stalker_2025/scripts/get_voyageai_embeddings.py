@@ -64,17 +64,18 @@ class Embedder:
         self.cache = {}
 
     def get_rows(self, connection: psycopg.Connection) -> Iterable:
-        query = f"SELECT id, query FROM {self.settings.source_table} WHERE id > 130700 ORDER BY id ASC"
+        query = "SELECT id, query FROM %s WHERE id > 130700 ORDER BY id ASC"
         if self.settings.max_rows:
             query += f" LIMIT {self.settings.max_rows}"
         connection.execute(
-            "SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY"
+            "SET SESSION CHARACTERISTICS AS TRANSACTION "
+            "ISOLATION LEVEL REPEATABLE READ READ ONLY"
         )
         connection.execute(
             "SET statement_timeout = 0"
         )  # opt: ensure no timeout while fetching
         with connection.cursor(name="stream_all") as cursor:
-            yield from cursor.stream(query, size=100)
+            yield from cursor.stream(query, (self.settings.source_table,), size=100)
 
     def get_batches(
         self, rows: Iterable[tuple[int, str]]
@@ -90,7 +91,7 @@ class Embedder:
 
     def embed(self, queries_id: int, query: str) -> EmbeddedQuery:
         if query in self.cache:
-            print("HIT CACHE")
+            print("HIT CACHE")  # noqa: T201
             return EmbeddedQuery(queries_id=queries_id, embedding=self.cache[query])
         embedding_result = self.voyageai_client.embed(
             [query], model=self.settings.voyageai_model, input_type=None
@@ -101,32 +102,35 @@ class Embedder:
         return embedding
 
     def save_embeddings(self, embeddings: Iterable[EmbeddedQuery]) -> None:
-        with psycopg.connect(self.settings.postgres_url) as connection:
-            with connection.cursor() as cursor:
-                cursor.executemany(
-                    "INSERT INTO embeddings_voyageai_3_5_lite (queries_id, embedding) VALUES (%s, %s)",
-                    [
-                        (embedding.queries_id, embedding.embedding)
-                        for embedding in embeddings
-                    ],
-                )
+        with (
+            psycopg.connect(self.settings.postgres_url) as connection,
+            connection.cursor() as cursor,
+        ):
+            cursor.executemany(
+                "INSERT INTO embeddings_voyageai_3_5_lite (queries_id, embedding) "
+                "VALUES (%s, %s)",
+                [
+                    (embedding.queries_id, embedding.embedding)
+                    for embedding in embeddings
+                ],
+            )
 
     async def main(self) -> None:
         with psycopg.connect(self.settings.postgres_url) as connection:
             rows = self.get_rows(connection)
-            print("Got row scroller")
+            print("Got row scroller")  # noqa: T201
             batches = self.get_batches(rows)
-            print("Got batches")
+            print("Got batches")  # noqa: T201
             # get embedding for each item in batch in parallel
             for i, batch in enumerate(batches):
-                print(f"Processing batch {i}")
-                print(f"Getting embeddings for batch {i}")
+                print(f"Processing batch {i}")  # noqa: T201
+                print(f"Getting embeddings for batch {i}")  # noqa: T201
                 embeddings = [self.embed(row[0], row[1]) for row in batch]
-                print(f"Got embeddings for batch {i}")
-                print(f"Saving embeddings for batch {i}")
+                print(f"Got embeddings for batch {i}")  # noqa: T201
+                print(f"Saving embeddings for batch {i}")  # noqa: T201
                 self.save_embeddings(embeddings)
-                print("Saved embeddings for batch {i}")
-                print(f"Processsed batch {i}")
+                print("Saved embeddings for batch {i}")  # noqa: T201
+                print(f"Processsed batch {i}")  # noqa: T201
 
 
 if __name__ == "__main__":

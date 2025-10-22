@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     )
 
 
-def main():
+def main() -> None:
     settings = Settings()
     voyageai_client = voyageai.Client(api_key=settings.voyageai_api_key)
     embedding_result = voyageai_client.embed(
@@ -40,16 +40,21 @@ def main():
     )
     embedding = embedding_result.embeddings[0]
     inner = ",".join(str(e) for e in embedding)
-    with psycopg.connect(settings.postgres_url) as connection:
-        with connection.cursor() as cursor:
-            inner = ",".join(str(e) for e in embedding)
-            cursor.execute(
-                "SELECT q.id, q.query FROM queries AS q JOIN embeddings_voyageai_3_5_lite AS e ON q.id = e.queries_id WHERE q.query != '-' ORDER BY e.embedding <-> %s",
-                (f"[{inner}]",),
-            )
-            results = cursor.fetchall()
-            for result in results[: settings.max_results]:
-                print(result)
+    with (
+        psycopg.connect(settings.postgres_url) as connection,
+        connection.cursor() as cursor,
+    ):
+        inner = ",".join(str(e) for e in embedding)
+        cursor.execute(
+            "SELECT q.id, q.query FROM queries AS q "
+            "JOIN embeddings_voyageai_3_5_lite AS e "
+            "ON q.id = e.queries_id WHERE q.query != '-' "
+            "ORDER BY e.embedding <-> %s",
+            (f"[{inner}]",),
+        )
+        results = cursor.fetchall()
+        for result in results[: settings.max_results]:
+            print(result)  # noqa: T201
 
 
 if __name__ == "__main__":

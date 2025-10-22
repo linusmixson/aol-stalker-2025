@@ -1,18 +1,16 @@
 import asyncio
 import csv
 import datetime
+from collections.abc import Iterable
 from logging import getLogger
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import NamedTuple
 
 import asyncpg
 from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
 
 from aol_stalker_2025.util import static_root
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 logger = getLogger(__name__)
 
@@ -25,7 +23,7 @@ class DataRow(NamedTuple):
     click_url: str
 
     @classmethod
-    def convert(cls, row: tuple[str, str, str, str, str]) -> DataRow:
+    def convert(cls, row: tuple[str, str, str, str, str]) -> "DataRow":
         return DataRow(
             anon_id=int(row[0]),
             query=row[1],

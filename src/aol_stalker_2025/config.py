@@ -1,6 +1,6 @@
 from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
-from sqlalchemy.engine.url import make_url, URL
+from sqlalchemy.engine.url import URL, make_url
 
 
 class Config(BaseSettings):
@@ -11,14 +11,14 @@ class Config(BaseSettings):
 
     model_config = ConfigDict(env_file=".env", extra="ignore")
 
-    def asyncpg_postgres_connection_url(self, ssl: bool = False) -> URL:
+    def asyncpg_postgres_connection_url(self, ssl: bool = False) -> URL:  # noqa: FBT001, FBT002
         url = make_url(self.postgres_connection_string)
         url = url.set(drivername="postgresql+asyncpg")
         if ssl:
             url = url.update_query_dict({"ssl": "true"})
         return url
 
-    def psycopg_postgres_connection_url(self, ssl: bool = False) -> URL:
+    def psycopg_postgres_connection_url(self, ssl: bool = False) -> URL:  # noqa: FBT001, FBT002
         url = make_url(self.postgres_connection_string)
         url = url.set(drivername="postgresql+psycopg")
         if ssl:

@@ -1,5 +1,7 @@
 from typing import Literal
+
 from pydantic import BaseModel, Field
+
 from aol_stalker_2025.db.models.queries import Query
 
 
