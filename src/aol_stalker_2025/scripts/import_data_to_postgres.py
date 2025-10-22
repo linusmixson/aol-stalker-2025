@@ -2,7 +2,7 @@ import asyncio
 import csv
 import datetime
 from logging import getLogger
-from pathlib import Path  # noqa: TC003 — pydantic actually uses this
+from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple
 
 import asyncpg
