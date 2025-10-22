@@ -91,8 +91,10 @@ class Embedder:
 
     def embed(self, queries_id: int, query: str) -> EmbeddedQuery:
         if query in self.cache:
-            print("HIT CACHE")  # noqa: T201
             return EmbeddedQuery(queries_id=queries_id, embedding=self.cache[query])
+        # You can pass more than one item of text to the embed method at a time…
+        # but for some reason, this results in different embeddings than
+        # you get doing them one at a time. I haven't figured out why this is yet.
         embedding_result = self.voyageai_client.embed(
             [query], model=self.settings.voyageai_model, input_type=None
         )
@@ -121,7 +123,9 @@ class Embedder:
             print("Got row scroller")  # noqa: T201
             batches = self.get_batches(rows)
             print("Got batches")  # noqa: T201
-            # get embedding for each item in batch in parallel
+            # This is obviously massively inefficient. Unfortunately,
+            # VoyageAI has pretty tight rate limits, and this serial
+            # approach stays south of them.
             for i, batch in enumerate(batches):
                 print(f"Processing batch {i}")  # noqa: T201
                 print(f"Getting embeddings for batch {i}")  # noqa: T201
