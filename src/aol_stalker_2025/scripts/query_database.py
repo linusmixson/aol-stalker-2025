@@ -52,6 +52,9 @@ def main() -> None:
             "ORDER BY e.embedding <-> %s",
             (f"[{inner}]",),
         )
+        # Using LIMIT above gives zero results even when there are viable resutlts.
+        # Another bizarre quirk I haven't figured out yet.
+        # This is a workaround with which I'm very unhappy.
         results = cursor.fetchall()
         for result in results[: settings.max_results]:
             print(result)  # noqa: T201
