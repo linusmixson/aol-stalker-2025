@@ -13,6 +13,7 @@ from aol_stalker_2025.config import config
 engine = create_engine(config.psycopg_postgres_connection_url())
 async_engine = create_async_engine(config.asyncpg_postgres_connection_url())
 
+
 def get_session():
     with Session(engine) as session:
         yield session
@@ -21,6 +22,7 @@ def get_session():
 async def get_async_session():
     async with AsyncSession(async_engine) as session:
         yield session
+
 
 SessionDependency = Annotated[Session, Depends(get_session)]
 AsyncSessionDependency = Annotated[AsyncSession, Depends(get_async_session)]

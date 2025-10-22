@@ -9,10 +9,7 @@ class Config(BaseSettings):
         default="postgresql://postgres:@localhost:5432/aol_stalker_2025",
     )
 
-    model_config = ConfigDict(
-        env_file=".env",
-        extra="ignore"
-    )
+    model_config = ConfigDict(env_file=".env", extra="ignore")
 
     def asyncpg_postgres_connection_url(self, ssl: bool = False) -> URL:
         url = make_url(self.postgres_connection_string)

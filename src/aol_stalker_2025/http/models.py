@@ -9,4 +9,3 @@ class RootResponse(BaseModel):
 
 class SearchResponse(BaseModel):
     results: list[Query] = Field(description="The results of the search")
-
